@@ -28,6 +28,20 @@
     return new TextDecoder("utf-8").decode(bytes);
   }
 
+  function utf8ToB64(str) {
+    var bytes = new TextEncoder().encode(str);
+    var bin = "";
+    var chunkSize = 0x8000;
+    for (var i = 0; i < bytes.length; i += chunkSize) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+    }
+    return btoa(bin);
+  }
+
+  function encodePath(filePath) {
+    return filePath.split("/").map(encodeURIComponent).join("/");
+  }
+
   function escHtml(s) {
     return String(s == null ? "" : s)
       .replace(/&/g, "&amp;")
@@ -62,7 +76,7 @@
   }
 
   async function getFileContent(filePath) {
-    var f = await gh(repoPath() + "/contents/" + filePath.split("/").map(encodeURIComponent).join("/"));
+    var f = await gh(repoPath() + "/contents/" + encodePath(filePath));
     return b64ToUtf8(f.content);
   }
 
@@ -93,36 +107,42 @@
     template = await getFileContent("_templates/post.html");
   }
 
-  /* ---------- 提交：一次 commit 包含多个文件 ---------- */
+  /* ---------- 提交：通过 Contents API 逐个文件提交 ----------
+   * 说明：fine-grained PAT 不支持 Git Data API（/git/blobs 等），
+   * 所以这里改用 /contents 接口，每个文件产生一次提交。 */
+  async function getFileSha(filePath) {
+    try {
+      var f = await gh(repoPath() + "/contents/" + encodePath(filePath));
+      return f.sha;
+    } catch (e) {
+      if (String(e.message).indexOf("404") >= 0) return null;
+      throw e;
+    }
+  }
+
   async function commitChanges(changes, message) {
-    var ref = await gh(repoPath() + "/git/ref/heads/" + encodeURIComponent(cfg.branch));
-    var refSha = ref.object.sha;
-    var commit = await gh(repoPath() + "/git/commits/" + refSha);
-    var entries = [];
     for (var i = 0; i < changes.length; i++) {
       var ch = changes[i];
+      var sha = await getFileSha(ch.path);
       if (ch.delete) {
-        entries.push({ path: ch.path, sha: null });
+        if (!sha) continue; /* 文件不存在，无需删除 */
+        await gh(repoPath() + "/contents/" + encodePath(ch.path), {
+          method: "DELETE",
+          body: { message: message, sha: sha, branch: cfg.branch }
+        });
         continue;
       }
-      var blob = await gh(repoPath() + "/git/blobs", {
-        method: "POST",
-        body: { content: ch.content, encoding: "utf-8" }
+      var body = {
+        message: message + "（" + ch.path + "）",
+        content: utf8ToB64(ch.content),
+        branch: cfg.branch
+      };
+      if (sha) body.sha = sha;
+      await gh(repoPath() + "/contents/" + encodePath(ch.path), {
+        method: "PUT",
+        body: body
       });
-      entries.push({ path: ch.path, mode: "100644", type: "blob", sha: blob.sha });
     }
-    var tree = await gh(repoPath() + "/git/trees", {
-      method: "POST",
-      body: { base_tree: commit.tree.sha, tree: entries }
-    });
-    var newCommit = await gh(repoPath() + "/git/commits", {
-      method: "POST",
-      body: { message: message, tree: tree.sha, parents: [refSha] }
-    });
-    await gh(repoPath() + "/git/refs/heads/" + encodeURIComponent(cfg.branch), {
-      method: "PATCH",
-      body: { sha: newCommit.sha, force: false }
-    });
   }
 
   /* ---------- 连接 ---------- */
