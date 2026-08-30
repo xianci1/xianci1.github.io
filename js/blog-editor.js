@@ -73,7 +73,7 @@
       } catch (e) { /* ignore */ }
       var hint = "";
       if (res.status === 403 || res.status === 404) {
-        hint = "（写操作失败时，请确认 Token 的 Contents 权限是 Read and write，不只是 Read）";
+        hint = "（连接/读取失败通常是 Token 已过期、被撤销，或没有勾选这个仓库；写操作失败请确认 Contents 权限是 Read and write）";
       }
       throw new Error(method + " " + path + " 失败：" + msg + hint);
     }
