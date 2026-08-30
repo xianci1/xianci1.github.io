@@ -10,15 +10,6 @@ window.BLOG_DATA = {
   },
   posts: [
     {
-      slug: "writing-guide",
-      title: "文章排版与写作指南",
-      date: "2026-08-29",
-      category: "教程",
-      tags: ["写作", "Markdown"],
-      excerpt: "标题、列表、表格、引用、代码块……这篇文章展示本站文章内容区的所有排版元素。",
-      url: "posts/writing-guide.html"
-    },
-    {
       slug: "deploy-github-pages",
       title: "部署到 GitHub Pages 全流程",
       date: "2026-08-28",
