@@ -24,7 +24,10 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $postsDir = Join-Path $root "_posts"
 $outDir = Join-Path $root "posts"
+$pagesDir = Join-Path $root "_pages"
 $tplPath = Join-Path $root "_templates/post.html"
+$tplAboutPath = Join-Path $root "_templates/about.html"
+$tplFriendsPath = Join-Path $root "_templates/friends.html"
 $configPath = Join-Path $root "_config.json"
 $dataPath = Join-Path $root "js/data.js"
 
@@ -51,16 +54,27 @@ if (-not (Test-Path $configPath)) {
 if (-not (Test-Path $tplPath)) {
     Write-Error "缺少文章模板 _templates/post.html"
 }
+if (-not (Test-Path $tplAboutPath)) {
+    Write-Error "缺少页面模板 _templates/about.html"
+}
+if (-not (Test-Path $tplFriendsPath)) {
+    Write-Error "缺少页面模板 _templates/friends.html"
+}
 if (-not (Test-Path $postsDir)) {
     New-Item -ItemType Directory -Path $postsDir | Out-Null
 }
 if (-not (Test-Path $outDir)) {
     New-Item -ItemType Directory -Path $outDir | Out-Null
 }
+if (-not (Test-Path $pagesDir)) {
+    New-Item -ItemType Directory -Path $pagesDir | Out-Null
+}
 
 $config = Get-Content -Raw -Encoding UTF8 $configPath | ConvertFrom-Json
 $site = $config.site
 $tpl = [System.IO.File]::ReadAllText($tplPath, [System.Text.Encoding]::UTF8)
+$tplAbout = [System.IO.File]::ReadAllText($tplAboutPath, [System.Text.Encoding]::UTF8)
+$tplFriends = [System.IO.File]::ReadAllText($tplFriendsPath, [System.Text.Encoding]::UTF8)
 
 <# ---------- Markdown 工具函数 ---------- #>
 
@@ -409,7 +423,82 @@ for ($i = 0; $i -lt $posts.Count; $i++) {
 [void]$sb.AppendLine("};")
 [System.IO.File]::WriteAllText($dataPath, $sb.ToString(), (New-Object System.Text.UTF8Encoding($false)))
 
+<# ---------- 生成关于页 / 友链页 ---------- #>
+
+$pageCount = 0
+
+$aboutFile = Join-Path $pagesDir "about.md"
+if (Test-Path $aboutFile) {
+    $raw = [System.IO.File]::ReadAllText($aboutFile, [System.Text.Encoding]::UTF8)
+    $fm = [regex]::Match($raw, '(?s)^---[ \t]*\r?\n(.*?)\r?\n---[ \t]*\r?\n?(.*)$')
+    $metaText = ""
+    $body = $raw
+    if ($fm.Success) {
+        $metaText = $fm.Groups[1].Value
+        $body = $fm.Groups[2].Value
+    }
+    $pTitle = Get-FmField $metaText "title" "关于"
+    $pAvatar = Get-FmField $metaText "avatar" ""
+    $pName = Get-FmField $metaText "name" "你的名字"
+    $pTagline = Get-FmField $metaText "tagline" ""
+    $pExcerpt = Get-FmField $metaText "excerpt" ""
+    if ($pAvatar -eq "") {
+        if ($pName.Length -gt 0) { $pAvatar = $pName.Substring(0, 1) } else { $pAvatar = "我" }
+    }
+    $bodyHtml = ConvertFrom-BlogMarkdown $body
+    $html = $tplAbout
+    $html = $html.Replace("__SITE_TITLE__", $site.title)
+    $html = $html.Replace("__TITLE__", $pTitle)
+    $html = $html.Replace("__DESCRIPTION__", $pExcerpt.Replace('"', '&quot;'))
+    $html = $html.Replace("__AVATAR__", $pAvatar)
+    $html = $html.Replace("__NAME__", $pName)
+    $html = $html.Replace("__TAGLINE__", $pTagline)
+    $html = $html.Replace("__BODY__", $bodyHtml)
+    [System.IO.File]::WriteAllText((Join-Path $root "about.html"), $html, (New-Object System.Text.UTF8Encoding($false)))
+    Write-Host "  [生成] about.html" -ForegroundColor Green
+    $pageCount++
+}
+
+$friendsFile = Join-Path $pagesDir "friends.md"
+if (Test-Path $friendsFile) {
+    $raw = [System.IO.File]::ReadAllText($friendsFile, [System.Text.Encoding]::UTF8)
+    $fm = [regex]::Match($raw, '(?s)^---[ \t]*\r?\n(.*?)\r?\n---[ \t]*\r?\n?(.*)$')
+    $metaText = ""
+    $body = $raw
+    if ($fm.Success) {
+        $metaText = $fm.Groups[1].Value
+        $body = $fm.Groups[2].Value
+    }
+    $pTitle = Get-FmField $metaText "title" "友链"
+    $pDesc = Get-FmField $metaText "desc" "交换友情链接，欢迎联系我。"
+    $pExcerpt = Get-FmField $metaText "excerpt" ""
+    $cards = New-Object System.Text.StringBuilder
+    foreach ($line in ($body -split '\r?\n')) {
+        $m = [regex]::Match($line, '^\s*[-*]\s+\[([^\]]+)\]\(([^)\s]+)\)\s*(.*)$')
+        if ($m.Success) {
+            $fName = Convert-Inline -Text $m.Groups[1].Value
+            $fUrl = $m.Groups[2].Value
+            $fDesc = Convert-Inline -Text $m.Groups[3].Value
+            [void]$cards.Append('<div class="friend-card card"><h2><a href="' + $fUrl + '" target="_blank" rel="noopener">' + $fName + '</a></h2><p>' + $fDesc + '</p></div>')
+        }
+    }
+    if ($cards.Length -eq 0) {
+        $friendsHtml = '<p class="empty-tip">还没有友链，去写作台添加。</p>'
+    } else {
+        $friendsHtml = $cards.ToString()
+    }
+    $html = $tplFriends
+    $html = $html.Replace("__SITE_TITLE__", $site.title)
+    $html = $html.Replace("__TITLE__", $pTitle)
+    $html = $html.Replace("__DESCRIPTION__", $pExcerpt.Replace('"', '&quot;'))
+    $html = $html.Replace("__DESC__", $pDesc)
+    $html = $html.Replace("__FRIENDS__", $friendsHtml)
+    [System.IO.File]::WriteAllText((Join-Path $root "friends.html"), $html, (New-Object System.Text.UTF8Encoding($false)))
+    Write-Host "  [生成] friends.html" -ForegroundColor Green
+    $pageCount++
+}
+
 Write-Host ""
-Write-Host ("构建完成：{0} 篇文章，js/data.js 已更新" -f $posts.Count) -ForegroundColor Cyan
+Write-Host ("构建完成：{0} 篇文章，{1} 个页面，js/data.js 已更新" -f $posts.Count, $pageCount) -ForegroundColor Cyan
 Write-Host "本地预览：双击 index.html"
 Write-Host '一键发布：.\deploy.ps1 "提交说明"'

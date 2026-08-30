@@ -9,9 +9,15 @@
   var cfg = null;
   var allPosts = [];
   var rawPosts = {};   // slug -> Markdown 原文
+  var rawPages = {};   // about/friends -> Markdown 原文
+  var pageTemplates = {};
+  var pageDefs = [
+    { key: "about", label: "关于", file: "_pages/about.md", page: "about.html", template: "_templates/about.html" },
+    { key: "friends", label: "友链", file: "_pages/friends.md", page: "friends.html", template: "_templates/friends.html" }
+  ];
   var site = null;
   var template = null;
-  var editing = null;  // { md, file, originalSlug }
+  var editing = null;  // 文章: { md, file, originalSlug }；页面: { kind:"page", key }
 
   function $(id) { return document.getElementById(id); }
 
@@ -112,6 +118,18 @@
     var cf = await getFileContent("_config.json");
     site = JSON.parse(cf).site;
     template = await getFileContent("_templates/post.html");
+    rawPages = {};
+    pageTemplates = {};
+    for (var i = 0; i < pageDefs.length; i++) {
+      var def = pageDefs[i];
+      try {
+        rawPages[def.key] = await getFileContent(def.file);
+      } catch (e) {
+        if (e.status === 404) rawPages[def.key] = defaultPageMd(def.key);
+        else throw e;
+      }
+      pageTemplates[def.key] = await getFileContent(def.template);
+    }
   }
 
   /* ---------- 提交：通过 Contents API 逐个文件提交 ----------
@@ -208,6 +226,8 @@
     cfg = null;
     allPosts = [];
     rawPosts = {};
+    rawPages = {};
+    pageTemplates = {};
     site = null;
     template = null;
     editing = null;
@@ -315,8 +335,51 @@
     $("editorCard").scrollIntoView({ behavior: "smooth" });
   }
 
+  function defaultPageMd(key) {
+    if (key === "about") {
+      return '---\ntitle: "关于"\navatar: "我"\nname: "你的名字"\ntagline: "Less interests, more interest."\nexcerpt: ""\n---\n\n这里写关于页内容……\n';
+    }
+    return '---\ntitle: "友链"\ndesc: "交换友情链接，欢迎联系我。"\nexcerpt: ""\n---\n\n- [站点名](https://example.com/) 一句介绍\n';
+  }
+
+  function openPageEditor(key) {
+    var def = null;
+    for (var i = 0; i < pageDefs.length; i++) {
+      if (pageDefs[i].key === key) def = pageDefs[i];
+    }
+    if (!def) return;
+    var md = rawPages[key] || defaultPageMd(key);
+    editing = { kind: "page", key: key };
+    $("mdInput").value = md;
+    $("editorTitle").textContent = "编辑" + def.label + "页";
+    $("deleteBtn").hidden = true;
+    $("editorCard").hidden = false;
+    $("settingsCard").hidden = true;
+    setStatus($("editorStatus"), "");
+    updatePreview();
+    $("editorCard").scrollIntoView({ behavior: "smooth" });
+  }
+
   function updatePreview() {
     var md = $("mdInput").value;
+    if (editing && editing.kind === "page") {
+      var pkey = editing.key;
+      var page = window.BlogMD.parsePage(md, pkey);
+      if (pkey === "about") {
+        $("metaSummary").textContent =
+          "头像「" + page.avatar + "」 名字「" + page.name + "」 签名「" + page.tagline + "」";
+        $("preview").innerHTML =
+          '<div class="about-card card"><div class="avatar">' + escHtml(page.avatar || "我") + "</div><div>" +
+          "<h2>" + escHtml(page.name || "你的名字") + "</h2>" +
+          "<p>" + escHtml(page.tagline || "") + "</p>" +
+          window.BlogMD.render(page.body) + "</div></div>";
+      } else {
+        $("metaSummary").textContent = page.desc || "交换友情链接，欢迎联系我。";
+        $("preview").innerHTML =
+          '<div class="friend-grid">' + window.BlogMD.renderFriends(page.body) + "</div>";
+      }
+      return;
+    }
     var post = window.BlogMD.parsePost(md, "preview");
     var meta = post.date + " · " + post.category +
       (post.tags.length ? " · " + post.tags.map(function (t) { return "#" + t; }).join(" ") : "");
@@ -328,6 +391,34 @@
       '<div class="post-meta"><span>' + escHtml(post.date) + "</span><span>·</span><span>" +
       escHtml(post.category) + "</span></div>" +
       window.BlogMD.render(post.body);
+  }
+
+  async function savePage() {
+    if (!editing || editing.kind !== "page") return;
+    var key = editing.key;
+    var def = null;
+    for (var i = 0; i < pageDefs.length; i++) {
+      if (pageDefs[i].key === key) def = pageDefs[i];
+    }
+    var md = $("mdInput").value;
+    var page = window.BlogMD.parsePage(md, key);
+    setStatus($("editorStatus"), "保存中…");
+    try {
+      await loadAll();
+      var html = window.BlogMD.buildPageHtml(key, page, site, pageTemplates[key]);
+      var changes = [
+        { path: def.file, content: md },
+        { path: def.page, content: html }
+      ];
+      await commitChanges(changes, "更新" + def.label + "页");
+      await loadAll();
+      editing = null;
+      $("editorCard").hidden = true;
+      renderPosts();
+      setStatus($("editorStatus"), "已保存并提交 ✔ 站点约 1-3 分钟更新，等不及可按 Ctrl+F5 强制刷新", true);
+    } catch (e) {
+      setStatus($("editorStatus"), "保存失败：" + e.message, false);
+    }
   }
 
   async function savePost() {
@@ -455,7 +546,15 @@
     $("connectBtn").onclick = connect;
     $("disconnectBtn").onclick = disconnect;
     $("newBtn").onclick = newPost;
-    $("saveBtn").onclick = savePost;
+    $("saveBtn").onclick = function () {
+      if (editing && editing.kind === "page") {
+        savePage();
+      } else {
+        savePost();
+      }
+    };
+    $("pageAboutBtn").onclick = function () { openPageEditor("about"); };
+    $("pageFriendsBtn").onclick = function () { openPageEditor("friends"); };
     $("cancelEditBtn").onclick = function () {
       editing = null;
       $("editorCard").hidden = true;

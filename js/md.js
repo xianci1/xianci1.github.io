@@ -205,30 +205,9 @@
 
   /* 解析 frontmatter，返回文章对象 */
   function parsePost(md, fallbackSlug) {
-    md = String(md == null ? "" : md);
-    var fm = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*\r?\n?([\s\S]*)$/.exec(md);
-    var metaText = "";
-    var body = md;
-    if (fm) {
-      metaText = fm[1];
-      body = fm[2];
-    }
-
-    function field(name, dflt) {
-      var re = new RegExp("^" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*:\\s*(.*)$", "m");
-      var m = re.exec(metaText);
-      if (m) {
-        var v = m[1].trim();
-        if (v.length >= 2) {
-          if ((v.charAt(0) === '"' && v.charAt(v.length - 1) === '"') ||
-              (v.charAt(0) === "'" && v.charAt(v.length - 1) === "'")) {
-            v = v.slice(1, -1);
-          }
-        }
-        return v;
-      }
-      return dflt;
-    }
+    var parts = splitFrontmatter(md);
+    var metaText = parts.metaText;
+    var body = parts.body;
 
     function tags() {
       var m = /^tags\s*:\s*(.*)$/m.exec(metaText);
@@ -248,11 +227,11 @@
       }).filter(function (s) { return s !== ""; });
     }
 
-    var slug = (field("slug", fallbackSlug) || "").replace(/\s+/g, "-").replace(/[\\/:*?"<>|#%]/g, "");
-    var title = field("title", fallbackSlug || "未命名");
-    var date = field("date", new Date().toISOString().slice(0, 10));
-    var category = field("category", "未分类");
-    var excerpt = field("excerpt", "");
+    var slug = (fmField(metaText, "slug", fallbackSlug) || "").replace(/\s+/g, "-").replace(/[\\/:*?"<>|#%]/g, "");
+    var title = fmField(metaText, "title", fallbackSlug || "未命名");
+    var date = fmField(metaText, "date", new Date().toISOString().slice(0, 10));
+    var category = fmField(metaText, "category", "未分类");
+    var excerpt = fmField(metaText, "excerpt", "");
     if (!excerpt) excerpt = autoExcerpt(body);
 
     return {
@@ -264,6 +243,86 @@
       excerpt: excerpt,
       body: body
     };
+  }
+
+  /* ---------- 页面（关于 / 友链） ---------- */
+
+  function splitFrontmatter(md) {
+    md = String(md == null ? "" : md);
+    var fm = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*\r?\n?([\s\S]*)$/.exec(md);
+    if (fm) return { metaText: fm[1], body: fm[2] };
+    return { metaText: "", body: md };
+  }
+
+  function fmField(metaText, name, dflt) {
+    var re = new RegExp("^" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*:\\s*(.*)$", "m");
+    var m = re.exec(metaText);
+    if (m) {
+      var v = m[1].trim();
+      if (v.length >= 2) {
+        if ((v.charAt(0) === '"' && v.charAt(v.length - 1) === '"') ||
+            (v.charAt(0) === "'" && v.charAt(v.length - 1) === "'")) {
+          v = v.slice(1, -1);
+        }
+      }
+      return v;
+    }
+    return dflt;
+  }
+
+  function parsePage(md, type) {
+    var parts = splitFrontmatter(md);
+    var metaText = parts.metaText;
+    var body = parts.body;
+    var title = fmField(metaText, "title", type === "about" ? "关于" : "友链");
+    var name = fmField(metaText, "name", "");
+    var avatar = fmField(metaText, "avatar", "");
+    if (!avatar) avatar = name ? name.charAt(0) : "我";
+    var tagline = fmField(metaText, "tagline", "");
+    var excerpt = fmField(metaText, "excerpt", "");
+    var desc = fmField(metaText, "desc", "交换友情链接，欢迎联系我。");
+    return {
+      title: title,
+      name: name,
+      avatar: avatar,
+      tagline: tagline,
+      excerpt: excerpt,
+      desc: desc,
+      body: body
+    };
+  }
+
+  /* 友链列表：- [名字](链接) 描述 */
+  function renderFriends(body) {
+    var lines = String(body == null ? "" : body).split(/\r?\n/);
+    var cards = [];
+    for (var i = 0; i < lines.length; i++) {
+      var m = lines[i].match(/^\s*[-*]\s+\[([^\]]+)\]\(([^)\s]+)\)\s*(.*)$/);
+      if (m) {
+        cards.push(
+          '<div class="friend-card card"><h2><a href="' + m[2] + '" target="_blank" rel="noopener">' +
+          inline(m[1]) + '</a></h2><p>' + inline(m[3]) + '</p></div>'
+        );
+      }
+    }
+    return cards.length ? cards.join("") : '<p class="empty-tip">还没有友链。</p>';
+  }
+
+  function buildPageHtml(type, page, site, template) {
+    var html = template;
+    html = html.split("__SITE_TITLE__").join(site.title);
+    html = html.split("__TITLE__").join(page.title);
+    html = html.split("__DESCRIPTION__").join(String(page.excerpt || page.desc || "").replace(/"/g, "&quot;"));
+    if (type === "about") {
+      html = html.split("__AVATAR__").join(page.avatar || "我");
+      html = html.split("__NAME__").join(page.name || site.author);
+      html = html.split("__TAGLINE__").join(page.tagline || site.subtitle);
+      html = html.split("__BODY__").join(render(page.body));
+    } else {
+      html = html.split("__DESC__").join(page.desc);
+      html = html.split("__FRIENDS__").join(renderFriends(page.body));
+    }
+    return html;
   }
 
   function jsString(s) {
@@ -320,6 +379,9 @@
     inline: inline,
     render: render,
     parsePost: parsePost,
+    parsePage: parsePage,
+    renderFriends: renderFriends,
+    buildPageHtml: buildPageHtml,
     autoExcerpt: autoExcerpt,
     buildPostHtml: buildPostHtml,
     buildDataJs: buildDataJs

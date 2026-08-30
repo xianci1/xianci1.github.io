@@ -18,13 +18,16 @@
 .\deploy.ps1 "添加新文章"
 ```
 
-也可以完全不碰命令行：打开 `admin.html`（写作台），在浏览器里直接写文章，保存时自动提交到 GitHub。
+也可以完全不碰命令行：打开 `admin.html`（写作台），在浏览器里直接写文章、改关于页和友链页，保存时自动提交到 GitHub。
 
 ## 目录结构
 
 ```text
 blog/
 ├── _config.json         # 站点信息（标题 / 作者 / 签名）
+├── _pages/              # 关于页 / 友链页的 Markdown 内容源
+│   ├── about.md
+│   └── friends.md
 ├── _posts/              # ★ 你只需要在这里写 Markdown 文章
 │   ├── hello-world.md
 │   ├── writing-guide.md
@@ -37,8 +40,8 @@ blog/
 ├── posts.html           # 全部文章（按年份归档）
 ├── categories.html      # 分类
 ├── tags.html            # 标签云
-├── about.html           # 关于页（手改）
-├── friends.html         # 友链页（手改）
+├── about.html           # 关于页（由 _pages/about.md 生成）
+├── friends.html         # 友链页（由 _pages/friends.md 生成）
 ├── 404.html             # 404 页面
 ├── admin.html           # ★ 写作台（浏览器里写文章）
 ├── posts/               # ★ 生成的文章 HTML，不要手改
@@ -94,7 +97,7 @@ excerpt: "一句话摘要，留空会自动从正文取。"
 3. **Repository permissions → Contents** 选 **Read and write**
 4. 生成并复制 token，粘贴到写作台的连接面板
 
-连接后就可以在浏览器里**新建 / 编辑 / 删除**文章，右侧实时预览；点“保存到 GitHub”会把 Markdown、生成的 HTML 和 `js/data.js` 一次性提交到仓库，GitHub Pages 会自动重新发布。
+连接后就可以在浏览器里**新建 / 编辑 / 删除**文章，还能直接修改**关于页**和**友链页**，右侧实时预览；点“保存到 GitHub”会把 Markdown、生成的 HTML 和 `js/data.js` 一次性提交到仓库，GitHub Pages 会自动重新发布。
 
 说明：
 - Token 只保存在当前浏览器的 `localStorage`，只发送给 `api.github.com`，不会上传到博客服务器

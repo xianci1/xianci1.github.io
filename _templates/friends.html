@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>关于 - 博客</title>
-  <meta name="description" content="关于本站和作者。">
+  <title>__TITLE__ - __SITE_TITLE__</title>
+  <meta name="description" content="__DESCRIPTION__">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body data-page="about">
+<body data-page="friends">
   <header class="site-header">
     <div class="container header-inner">
-      <a class="site-title" href="index.html">博客</a>
+      <a class="site-title" href="index.html">__SITE_TITLE__</a>
       <nav class="site-nav" id="siteNav">
         <a href="index.html" data-nav="home">首页</a>
         <a href="posts.html" data-nav="posts">文章</a>
@@ -37,22 +37,17 @@
   </header>
 
   <main class="container page">
-    <h1>关于</h1>
-    <p class="page-desc">关于本站和作者。</p>
+    <h1>__TITLE__</h1>
+    <p class="page-desc">__DESC__</p>
 
-    <div class="about-card card">
-      <div class="avatar">你</div>
-      <div>
-        <h2>你的名字</h2>
-        <p>Less interests, more interest.</p>
-<p>这个博客用来记录学习过程中遇到的问题和思考，希望和大家多多讨论。</p><ul><li>Email：<a href="mailto:you@example.com">you@example.com</a></li><li>GitHub：<a href="https://github.com/">github.com/你的用户名</a></li><li>当前在读：某大学 · 某专业</li></ul>
-      </div>
+    <div class="friend-grid">
+__FRIENDS__
     </div>
   </main>
 
   <footer class="site-footer">
     <div class="container">
-      <p>© <span id="footerYear"></span> <span id="footerName">博客</span> · 纯静态博客 · <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a></p>
+      <p>© <span id="footerYear"></span> <span id="footerName">__SITE_TITLE__</span> · 纯静态博客 · <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a></p>
     </div>
   </footer>
 
