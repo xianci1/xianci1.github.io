@@ -50,6 +50,7 @@ blog/
 ├── js/main.js           # 列表渲染 + 搜索 + 菜单
 ├── js/md.js             # Markdown 转换（写作台和构建共用）
 ├── js/blog-editor.js    # 写作台逻辑（GitHub API）
+├── assets/uploads/      # ★ 写作台上传的图片 / 文档
 └── assets/favicon.svg   # 站点图标
 ```
 
@@ -97,7 +98,7 @@ excerpt: "一句话摘要，留空会自动从正文取。"
 3. **Repository permissions → Contents** 选 **Read and write**
 4. 生成并复制 token，粘贴到写作台的连接面板
 
-连接后就可以在浏览器里**新建 / 编辑 / 删除**文章，还能直接修改**关于页**和**友链页**，右侧实时预览；点“保存到 GitHub”会把 Markdown、生成的 HTML 和 `js/data.js` 一次性提交到仓库，GitHub Pages 会自动重新发布。
+连接后就可以在浏览器里**新建 / 编辑 / 删除**文章，还能直接修改**关于页**和**友链页**，右侧实时预览；也可以**上传图片和文档**（自动存入 `assets/uploads/`，一键插入到文章里，图片显示、文档变下载链接）；点“保存到 GitHub”会把 Markdown、生成的 HTML 和 `js/data.js` 一次性提交到仓库，GitHub Pages 会自动重新发布。
 
 说明：
 - Token 只保存在当前浏览器的 `localStorage`，只发送给 `api.github.com`，不会上传到博客服务器

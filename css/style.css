@@ -413,6 +413,11 @@ a:hover { text-decoration: underline; }
   background: #fff;
   color: var(--text);
 }
+.field input[type="file"],
+.admin-card input[type="file"] {
+  font-size: 14px;
+  max-width: 100%;
+}
 .field input:focus,
 .field textarea:focus {
   outline: 2px solid var(--accent-soft);

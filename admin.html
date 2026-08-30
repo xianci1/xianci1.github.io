@@ -73,6 +73,21 @@
       <div id="postList"></div>
     </section>
 
+    <section class="admin-card" id="filesCard" hidden>
+      <h2>文件（图片 / 文档）</h2>
+      <div class="actions" style="margin-top: 0; margin-bottom: 10px; align-items: center;">
+        <input type="file" id="fileInput" multiple>
+        <button class="btn primary" id="uploadBtn">上传</button>
+      </div>
+      <p class="token-note" style="margin-top: 0;">
+        支持图片（png / jpg / gif / webp / svg）和文档（pdf / doc / zip 等）。
+        上传后点“插入”即可在文章里引用；图片显示，文档变成下载链接。
+        单个文件建议不超过 10MB。
+      </p>
+      <div class="status" id="filesStatus"></div>
+      <div id="fileList"></div>
+    </section>
+
     <section class="admin-card" id="editorCard" hidden>
       <h2 id="editorTitle">编辑文章</h2>
       <div class="editor-grid">

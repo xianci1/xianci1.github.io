@@ -15,6 +15,8 @@
     { key: "about", label: "关于", file: "_pages/about.md", page: "about.html", template: "_templates/about.html" },
     { key: "friends", label: "友链", file: "_pages/friends.md", page: "friends.html", template: "_templates/friends.html" }
   ];
+  var uploadDir = "assets/uploads";
+  var uploads = [];
   var site = null;
   var template = null;
   var editing = null;  // 文章: { md, file, originalSlug }；页面: { kind:"page", key }
@@ -172,7 +174,7 @@
       }
       var body = {
         message: message + "（" + ch.path + "）",
-        content: utf8ToB64(ch.content),
+        content: ch.b64 ? ch.content : utf8ToB64(ch.content),
         branch: cfg.branch
       };
       if (sha) body.sha = sha;
@@ -213,6 +215,7 @@
     try {
       await gh(repoPath());
       await loadAll();
+      await refreshUploads();
       renderPosts();
       showConnected();
       setStatus($("connectStatus"), "连接成功 ✔", true);
@@ -228,10 +231,12 @@
     rawPosts = {};
     rawPages = {};
     pageTemplates = {};
+    uploads = [];
     site = null;
     template = null;
     editing = null;
     $("postsCard").hidden = true;
+    $("filesCard").hidden = true;
     $("editorCard").hidden = true;
     $("settingsCard").hidden = true;
     $("connectBtn").hidden = false;
@@ -245,12 +250,151 @@
 
   function showConnected() {
     $("postsCard").hidden = false;
+    $("filesCard").hidden = false;
     $("connectBtn").hidden = true;
     $("disconnectBtn").hidden = false;
     $("owner").disabled = true;
     $("repo").disabled = true;
     $("branch").disabled = true;
     $("token").disabled = true;
+  }
+
+  /* ---------- 文件上传 ---------- */
+  function sanitizeFileName(name) {
+    name = String(name || "").replace(/^.*[\\/]/, "").trim();
+    name = name.replace(/\s+/g, "-").replace(/[\\/:*?"<>|#%]/g, "");
+    return name || "file";
+  }
+
+  function readFileAsBase64(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var dataUrl = String(reader.result || "");
+        var idx = dataUrl.indexOf(",");
+        resolve(idx >= 0 ? dataUrl.slice(idx + 1) : dataUrl);
+      };
+      reader.onerror = function () { reject(new Error("读取文件失败")); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function snippetFor(name) {
+    var lower = String(name || "").toLowerCase();
+    var isImage = /\.(png|jpe?g|gif|webp|svg|bmp|ico)$/.test(lower);
+    var path = "../" + uploadDir + "/" + name;
+    return isImage ? "![" + name + "](" + path + ")" : "[" + name + "](" + path + ")";
+  }
+
+  async function refreshUploads() {
+    uploads = [];
+    try {
+      var items = await gh(repoPath() + "/contents/" + encodePath(uploadDir));
+      uploads = items.filter(function (it) { return it.type === "file"; });
+    } catch (e) {
+      if (e.status !== 404) throw e;
+    }
+    renderUploads();
+  }
+
+  function renderUploads() {
+    var list = $("fileList");
+    list.innerHTML = "";
+    if (!uploads.length) {
+      var empty = document.createElement("div");
+      empty.className = "empty-tip";
+      empty.textContent = "还没有文件，先上传图片或文档。";
+      list.appendChild(empty);
+      return;
+    }
+    uploads.forEach(function (u) {
+      var row = document.createElement("div");
+      row.className = "post-row";
+
+      var info = document.createElement("div");
+      info.className = "info";
+      var b = document.createElement("b");
+      b.textContent = u.name;
+      var s = document.createElement("span");
+      s.textContent = (u.size ? Math.round(u.size / 1024) + " KB" : "") + "　" + snippetFor(u.name);
+      info.appendChild(b);
+      info.appendChild(s);
+
+      var ins = document.createElement("button");
+      ins.className = "btn";
+      ins.textContent = "插入";
+      ins.onclick = function () { insertSnippet(u.name); };
+
+      var del = document.createElement("button");
+      del.className = "btn danger";
+      del.textContent = "删除";
+      del.onclick = function () { deleteUpload(u.name); };
+
+      row.appendChild(info);
+      row.appendChild(ins);
+      row.appendChild(del);
+      list.appendChild(row);
+    });
+  }
+
+  function insertAtCursor(text) {
+    var ta = $("mdInput");
+    var start = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
+    var end = ta.selectionEnd != null ? ta.selectionEnd : ta.value.length;
+    ta.value = ta.value.slice(0, start) + text + ta.value.slice(end);
+    var pos = start + text.length;
+    ta.selectionStart = ta.selectionEnd = pos;
+    ta.focus();
+    updatePreview();
+  }
+
+  function insertSnippet(name) {
+    if (!editing) {
+      window.alert("请先新建或打开一篇文章/页面，再插入文件引用");
+      return;
+    }
+    insertAtCursor("\n" + snippetFor(name) + "\n");
+  }
+
+  async function uploadFiles(files) {
+    if (!files || !files.length) {
+      setStatus($("filesStatus"), "请先选择要上传的文件", false);
+      return;
+    }
+    setStatus($("filesStatus"), "上传中…");
+    var okCount = 0;
+    var failList = [];
+    try {
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        if (file.size > 10 * 1024 * 1024) {
+          failList.push(file.name + "（超过 10MB）");
+          continue;
+        }
+        var b64 = await readFileAsBase64(file);
+        var name = sanitizeFileName(file.name);
+        await commitChanges([{ path: uploadDir + "/" + name, content: b64, b64: true }], "上传文件：" + name);
+        okCount++;
+      }
+      await refreshUploads();
+      var msg = okCount + " 个文件上传成功 ✔";
+      if (failList.length) msg += "，失败：" + failList.join("、");
+      setStatus($("filesStatus"), msg, failList.length === 0);
+    } catch (e) {
+      setStatus($("filesStatus"), "上传失败：" + e.message, false);
+    }
+  }
+
+  async function deleteUpload(name) {
+    if (!window.confirm("确定删除文件 " + name + "？已引用的文章链接会失效。")) return;
+    setStatus($("filesStatus"), "删除中…");
+    try {
+      await commitChanges([{ path: uploadDir + "/" + name, delete: true }], "删除文件：" + name);
+      await refreshUploads();
+      setStatus($("filesStatus"), "已删除 ✔", true);
+    } catch (e) {
+      setStatus($("filesStatus"), "删除失败：" + e.message, false);
+    }
   }
 
   /* ---------- 文章列表 ---------- */
@@ -365,6 +509,7 @@
     if (editing && editing.kind === "page") {
       var pkey = editing.key;
       var page = window.BlogMD.parsePage(md, pkey);
+      var bodyHtml = window.BlogMD.render(page.body).replace(/\.\.\/assets\//g, "assets/");
       if (pkey === "about") {
         $("metaSummary").textContent =
           "头像「" + page.avatar + "」 名字「" + page.name + "」 签名「" + page.tagline + "」";
@@ -372,7 +517,7 @@
           '<div class="about-card card"><div class="avatar">' + escHtml(page.avatar || "我") + "</div><div>" +
           "<h2>" + escHtml(page.name || "你的名字") + "</h2>" +
           "<p>" + escHtml(page.tagline || "") + "</p>" +
-          window.BlogMD.render(page.body) + "</div></div>";
+          bodyHtml + "</div></div>";
       } else {
         $("metaSummary").textContent = page.desc || "交换友情链接，欢迎联系我。";
         $("preview").innerHTML =
@@ -390,7 +535,7 @@
       "<h1>" + escHtml(post.title) + "</h1>" +
       '<div class="post-meta"><span>' + escHtml(post.date) + "</span><span>·</span><span>" +
       escHtml(post.category) + "</span></div>" +
-      window.BlogMD.render(post.body);
+      window.BlogMD.render(post.body).replace(/\.\.\/assets\//g, "assets/");
   }
 
   async function savePage() {
@@ -564,6 +709,10 @@
     };
     $("settingsBtn").onclick = openSettings;
     $("saveSettingsBtn").onclick = saveSettings;
+    $("uploadBtn").onclick = function () {
+      uploadFiles($("fileInput").files);
+      $("fileInput").value = "";
+    };
     $("mdInput").addEventListener("input", updatePreview);
 
     var yearEl = $("footerYear");
