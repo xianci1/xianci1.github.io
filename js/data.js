@@ -9,5 +9,14 @@ window.BLOG_DATA = {
     since: 2026
   },
   posts: [
+    {
+      slug: "new-post",
+      title: "新征程",
+      date: "2026-08-30",
+      category: "随笔",
+      tags: [],
+      excerpt: "今天是此博客开始之日，日后还会有更多的功能等待开发；",
+      url: "posts/new-post.html"
+    }
   ]
 };
