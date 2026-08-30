@@ -10,15 +10,6 @@ window.BLOG_DATA = {
   },
   posts: [
     {
-      slug: "hello-world",
-      title: "欢迎来到我的博客",
-      date: "2026-08-30",
-      category: "随笔",
-      tags: ["博客", "开始"],
-      excerpt: "这是第一篇文章，介绍这个博客的来由、技术栈和以后会写什么。",
-      url: "posts/hello-world.html"
-    },
-    {
       slug: "writing-guide",
       title: "文章排版与写作指南",
       date: "2026-08-29",
