@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>文章排版与写作指南 - 我的学习博客</title>
+  <meta name="description" content="本站文章内容区的所有排版元素示例。">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page="post">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="site-title" href="../index.html">我的学习博客</a>
+      <nav class="site-nav" id="siteNav">
+        <a href="../index.html" data-nav="home">首页</a>
+        <a href="../posts.html" data-nav="posts">文章</a>
+        <a href="../categories.html" data-nav="categories">分类</a>
+        <a href="../tags.html" data-nav="tags">标签</a>
+        <a href="../about.html" data-nav="about">关于</a>
+        <a href="../friends.html" data-nav="friends">友链</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn" id="searchBtn" title="搜索 (Ctrl+K)" aria-label="搜索">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="M21 21l-4.3-4.3"></path>
+          </svg>
+        </button>
+        <button class="icon-btn menu-btn" id="menuBtn" aria-label="菜单">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container article">
+    <article data-slug="writing-guide">
+      <header class="article-head">
+        <h1>文章排版与写作指南</h1>
+        <div class="post-meta article-meta"></div>
+      </header>
+
+      <div class="article-body">
+        <p>本站文章直接写在 HTML 里，下面的元素都可以直接复制使用。</p>
+
+        <h2>标题层级</h2>
+        <p>用 <code>&lt;h2&gt;</code> 分大节，<code>&lt;h3&gt;</code> 分小节，<code>&lt;h4&gt;</code> 做更细的分层：</p>
+        <h3>这是一个三级标题</h3>
+        <p>三级标题下的正文。</p>
+        <h4>这是一个四级标题</h4>
+        <p>四级标题下的正文。</p>
+
+        <h2>列表</h2>
+        <h3>无序列表</h3>
+        <ul>
+          <li>第一项</li>
+          <li>第二项
+            <ul>
+              <li>嵌套列表项</li>
+            </ul>
+          </li>
+          <li>第三项</li>
+        </ul>
+        <h3>有序列表</h3>
+        <ol>
+          <li>第一步</li>
+          <li>第二步</li>
+          <li>第三步</li>
+        </ol>
+
+        <h2>表格</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>项目</th>
+              <th>说明</th>
+              <th>示例</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>行内代码</td>
+              <td>正文里提到代码时使用</td>
+              <td><code>npm install</code></td>
+            </tr>
+            <tr>
+              <td>代码块</td>
+              <td>多行代码使用</td>
+              <td><code>&lt;pre&gt;&lt;code&gt;…&lt;/code&gt;&lt;/pre&gt;</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>引用</h2>
+        <blockquote>
+          <p>这是引用块，适合放名言、原文摘录或重要提示。</p>
+        </blockquote>
+
+        <h2>代码块</h2>
+        <pre><code>function hello(name) {
+  console.log("你好，" + name);
+}
+
+hello("世界");</code></pre>
+
+        <h2>图片</h2>
+        <p>图片放在 <code>assets/</code> 目录里，用 <code>&lt;img&gt;</code> 引用（注意文章页要加 <code>../</code>）：</p>
+        <pre><code>&lt;img src="../assets/favicon.svg" alt="站点图标"&gt;</code></pre>
+        <p>效果如下：</p>
+        <img src="../assets/favicon.svg" alt="站点图标示例" style="width: 96px; height: 96px;">
+
+        <h2>强调与链接</h2>
+        <p>可以用 <strong>加粗</strong> 和 <em>斜体</em> 突出重点，用 <a href="https://example.com" target="_blank" rel="noopener">链接</a> 引用外部资料。</p>
+
+        <hr>
+
+        <p>以上就是在文章里会用到的所有排版元素，够用了。</p>
+      </div>
+    </article>
+    <nav class="post-nav" id="postNav"></nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© <span id="footerYear"></span> <span id="footerName">你的名字</span> · 纯静态博客 · <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a></p>
+    </div>
+  </footer>
+
+  <div class="search-overlay" id="searchOverlay" hidden>
+    <div class="search-box">
+      <div class="search-head">
+        <input id="searchInput" type="text" placeholder="输入关键词搜索文章…" autocomplete="off">
+        <button class="icon-btn" id="searchCloseBtn" aria-label="关闭">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6L6 18"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="search-tags" id="searchHotTags"></div>
+      <ul class="search-results" id="searchResults"></ul>
+    </div>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>
