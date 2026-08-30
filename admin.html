@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>写作台 - 我的学习博客</title>
+  <meta name="description" content="在浏览器里直接写文章并发布到 GitHub Pages。">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="admin">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="site-title" href="index.html">我的学习博客</a>
+      <nav class="site-nav" id="siteNav">
+        <a href="index.html">首页</a>
+        <a href="posts.html">文章</a>
+        <a href="categories.html">分类</a>
+        <a href="tags.html">标签</a>
+        <a href="about.html">关于</a>
+        <a href="friends.html">友链</a>
+      </nav>
+      <div class="header-actions">
+        <a class="btn" href="index.html" style="font-size: 14px;">← 返回博客</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container admin">
+    <h1>写作台</h1>
+    <p class="admin-sub">在浏览器里写文章，保存后自动提交到 GitHub，网站自动更新。</p>
+
+    <section class="admin-card" id="connectCard">
+      <h2>连接 GitHub</h2>
+      <div class="field">
+        <label>仓库所有者（GitHub 用户名）</label>
+        <input id="owner" type="text" placeholder="xianci1">
+      </div>
+      <div class="field">
+        <label>仓库名</label>
+        <input id="repo" type="text" placeholder="xianci1.github.io">
+      </div>
+      <div class="field">
+        <label>分支</label>
+        <input id="branch" type="text" value="main">
+      </div>
+      <div class="field">
+        <label>Personal Access Token（只保存在本浏览器，只会发送给 api.github.com）</label>
+        <input id="token" type="password" placeholder="github_pat_xxxxxxxx">
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="connectBtn">连接</button>
+        <button class="btn" id="disconnectBtn" hidden>断开</button>
+      </div>
+      <div class="status" id="connectStatus"></div>
+      <div class="token-note">
+        <strong>怎么创建 Token：</strong><br>
+        GitHub → Settings → Developer settings → Personal access tokens → <strong>Fine-grained tokens</strong> → Generate new token<br>
+        ① Repository access 选 <strong>Only select repositories</strong>，勾选你的博客仓库（如 xianci1.github.io）<br>
+        ② Repository permissions → <strong>Contents: Read and write</strong><br>
+        ③ 生成后复制 token 粘贴到上面（只显示一次，请存好）
+      </div>
+    </section>
+
+    <section class="admin-card" id="postsCard" hidden>
+      <h2>文章</h2>
+      <div class="actions" style="margin-top: 0; margin-bottom: 10px;">
+        <button class="btn primary" id="newBtn">＋ 新建文章</button>
+        <button class="btn" id="settingsBtn">站点设置</button>
+      </div>
+      <div id="postList"></div>
+    </section>
+
+    <section class="admin-card" id="editorCard" hidden>
+      <h2 id="editorTitle">编辑文章</h2>
+      <div class="editor-grid">
+        <div>
+          <div class="field">
+            <textarea id="mdInput" placeholder="---&#10;title: &quot;文章标题&quot;&#10;date: 2026-08-30&#10;category: 教程&#10;tags: [标签1, 标签2]&#10;excerpt: &quot;&quot;&#10;---&#10;&#10;# 标题&#10;&#10;正文……"></textarea>
+          </div>
+          <div class="meta-summary" id="metaSummary"></div>
+        </div>
+        <div class="preview-pane" id="preview"></div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="saveBtn">保存到 GitHub</button>
+        <button class="btn danger" id="deleteBtn" hidden>删除这篇文章</button>
+        <button class="btn" id="cancelEditBtn">取消</button>
+      </div>
+      <div class="status" id="editorStatus"></div>
+    </section>
+
+    <section class="admin-card" id="settingsCard" hidden>
+      <h2>站点设置</h2>
+      <div class="field">
+        <label>站点标题</label>
+        <input id="siteTitle" type="text">
+      </div>
+      <div class="field">
+        <label>副标题 / 签名</label>
+        <input id="siteSubtitle" type="text">
+      </div>
+      <div class="field">
+        <label>作者</label>
+        <input id="siteAuthor" type="text">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input id="siteEmail" type="text">
+      </div>
+      <div class="field">
+        <label>建站年份</label>
+        <input id="siteSince" type="number">
+      </div>
+      <button class="btn primary" id="saveSettingsBtn">保存设置</button>
+      <div class="status" id="settingsStatus"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© <span id="footerYear"></span> 我的学习博客 · 写作台</p>
+    </div>
+  </footer>
+
+  <script src="js/md.js"></script>
+  <script src="js/blog-editor.js"></script>
+</body>
+</html>

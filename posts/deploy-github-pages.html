@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>部署到 GitHub Pages 全流程 - 我的学习博客</title>
-  <meta name="description" content="把这个纯静态博客免费部署到 GitHub Pages 的完整步骤。">
+  <meta name="description" content="从零开始，把这个纯静态博客免费部署到 GitHub Pages，并绑定自己的域名。">
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../css/style.css">
 </head>
@@ -44,62 +44,13 @@
       </header>
 
       <div class="article-body">
-        <p>这个博客是纯静态网站，GitHub Pages 可以免费托管，访问地址是 <code>https://你的用户名.github.io</code>。</p>
-
-        <h2>前置条件</h2>
-        <ul>
-          <li>一个 GitHub 账号</li>
-          <li>本机安装了 Git（本机已装：git 2.49）</li>
-        </ul>
-
-        <h2>第一步：在 GitHub 上新建仓库</h2>
-        <p>仓库名字必须是 <strong>&lt;你的用户名&gt;.github.io</strong>，例如用户名为 <code>zhangsan</code>，仓库就是 <code>zhangsan.github.io</code>。</p>
-
-        <h2>第二步：把本地代码推上去</h2>
-        <p>在项目目录打开终端，执行：</p>
-        <pre><code>git init
+<p>这个博客是纯静态网站，GitHub Pages 可以免费托管，访问地址是 <code>https://你的用户名.github.io</code>。</p><h2>前置条件</h2><ul><li>一个 GitHub 账号</li><li>本机安装了 Git</li></ul><h2>第一步：在 GitHub 上新建仓库</h2><p>仓库名字必须是 <strong>&lt;你的用户名&gt;.github.io</strong>，例如用户名为 <code>zhangsan</code>，仓库就是 <code>zhangsan.github.io</code>。</p><h2>第二步：把本地代码推上去</h2><p>在项目目录打开终端，执行：</p><pre><code class="language-bash">git init
 git add .
 git commit -m "init blog"
 git branch -M main
 git remote add origin https://github.com/你的用户名/你的用户名.github.io.git
-git push -u origin main</code></pre>
-        <p>推送时如果要求登录，按提示输入 GitHub 用户名和个人访问令牌（Personal Access Token）即可。</p>
-
-        <h2>第三步：开启 GitHub Pages</h2>
-        <ol>
-          <li>打开仓库的 <strong>Settings → Pages</strong></li>
-          <li>在 Build and deployment 里把 Source 选为 <strong>Deploy from a branch</strong></li>
-          <li>Branch 选 <strong>main</strong>，目录选 <strong>/ (root)</strong>，点击 Save</li>
-          <li>等一两分钟，访问 <code>https://你的用户名.github.io</code> 就能看到博客了</li>
-        </ol>
-
-        <h2>第四步（可选）：绑定自己的域名</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>域名类型</th>
-              <th>DNS 记录</th>
-              <th>解析值</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>顶级域名</td>
-              <td>A 记录 × 4</td>
-              <td>185.199.108.153 / 109.153 / 110.153 / 111.153</td>
-            </tr>
-            <tr>
-              <td>子域名（如 www）</td>
-              <td>CNAME 记录</td>
-              <td>你的用户名.github.io</td>
-            </tr>
-          </tbody>
-        </table>
-        <p>然后在仓库 Settings → Pages 里填上你的域名，并在项目根目录新建一个 <code>CNAME</code> 文件，内容就是域名本身。之后在 Pages 设置里勾选 Enforce HTTPS 即可。</p>
-
-        <blockquote>
-          <p>以后每次写完文章，执行 <code>git add .</code>、<code>git commit -m "新文章"</code>、<code>git push</code>，网站就会自动更新。</p>
-        </blockquote>
+git push -u origin main
+</code></pre><p>推送时如果要求登录，按提示输入 GitHub 用户名和个人访问令牌（Personal Access Token）即可。</p><h2>第三步：开启 GitHub Pages</h2><ol><li>打开仓库的 <strong>Settings → Pages</strong></li><li>在 Build and deployment 里把 Source 选为 <strong>Deploy from a branch</strong></li><li>Branch 选 <strong>main</strong>，目录选 <strong>/ (root)</strong>，点击 Save</li><li>等一两分钟，访问 <code>https://你的用户名.github.io</code> 就能看到博客了</li></ol><h2>第四步（可选）：绑定自己的域名</h2><table><thead><tr><th>域名类型</th><th>DNS 记录</th><th>解析值</th></tr></thead><tbody><tr><td>顶级域名</td><td>A 记录 × 4</td><td>185.199.108.153 / 185.199.109.153 / 185.199.110.153 / 185.199.111.153</td></tr><tr><td>子域名（如 www）</td><td>CNAME 记录</td><td>你的用户名.github.io</td></tr></tbody></table><p>然后在仓库 Settings → Pages 里填上你的域名，并在项目根目录新建一个 <code>CNAME</code> 文件，内容就是域名本身。之后在 Pages 设置里勾选 Enforce HTTPS 即可。</p><blockquote><p>以后每次写完文章，执行 <code>git add .</code>、<code>git commit -m "新文章"</code>、<code>git push</code>，网站就会自动更新。</p></blockquote>
       </div>
     </article>
     <nav class="post-nav" id="postNav"></nav>

@@ -297,6 +297,15 @@
   var yearEl = document.getElementById("footerYear");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
+  var footP = document.querySelector(".site-footer p");
+  if (footP) {
+    var adminLink = document.createElement("a");
+    adminLink.href = base() + "admin.html";
+    adminLink.textContent = "写作台";
+    footP.appendChild(document.createTextNode(" · "));
+    footP.appendChild(adminLink);
+  }
+
   renderHero();
   renderRecent();
   renderAll();

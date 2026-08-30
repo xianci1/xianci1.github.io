@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>文章标题 - 我的学习博客</title>
-  <meta name="description" content="文章摘要，会显示在搜索结果里。">
+  <title>__TITLE__ - __SITE_TITLE__</title>
+  <meta name="description" content="__DESCRIPTION__">
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body data-page="post">
   <header class="site-header">
     <div class="container header-inner">
-      <a class="site-title" href="../index.html">我的学习博客</a>
+      <a class="site-title" href="../index.html">__SITE_TITLE__</a>
       <nav class="site-nav" id="siteNav">
         <a href="../index.html" data-nav="home">首页</a>
         <a href="../posts.html" data-nav="posts">文章</a>
@@ -37,23 +37,14 @@
   </header>
 
   <main class="container article">
-    <!-- 使用说明：
-         1. 把本文件复制为 posts/文章名.html（建议用英文或拼音文件名）
-         2. 把 data-slug 改成唯一标识（建议和文件名一致）
-         3. 替换 .article-body 里的正文
-         4. 在 js/data.js 的 posts 数组里加一条记录
-    -->
-    <article data-slug="your-post-slug">
+    <article data-slug="__SLUG__">
       <header class="article-head">
-        <h1>文章标题</h1>
+        <h1>__TITLE__</h1>
         <div class="post-meta article-meta"></div>
       </header>
 
       <div class="article-body">
-        <p>在这里写正文。</p>
-        <h2>小节标题</h2>
-        <p>正文内容。</p>
-        <pre><code>在这里写代码</code></pre>
+__BODY__
       </div>
     </article>
     <nav class="post-nav" id="postNav"></nav>
@@ -61,7 +52,7 @@
 
   <footer class="site-footer">
     <div class="container">
-      <p>© <span id="footerYear"></span> <span id="footerName">你的名字</span> · 纯静态博客 · <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a></p>
+      <p>© <span id="footerYear"></span> <span id="footerName">__AUTHOR__</span> · 纯静态博客 · <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a></p>
     </div>
   </footer>
 
