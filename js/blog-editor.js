@@ -378,7 +378,7 @@
       editing = null;
       $("editorCard").hidden = true;
       renderPosts();
-      setStatus($("editorStatus"), "已保存并提交 ✔", true);
+      setStatus($("editorStatus"), "已保存并提交 ✔ 站点约 1-3 分钟更新，等不及可按 Ctrl+F5 强制刷新", true);
     } catch (e) {
       setStatus($("editorStatus"), "保存失败：" + e.message, false);
     }
@@ -400,7 +400,7 @@
       editing = null;
       $("editorCard").hidden = true;
       renderPosts();
-      setStatus($("editorStatus"), "已删除并提交 ✔", true);
+      setStatus($("editorStatus"), "已删除并提交 ✔ 站点约 1-3 分钟更新，等不及可按 Ctrl+F5 强制刷新", true);
     } catch (e) {
       setStatus($("editorStatus"), "删除失败：" + e.message, false);
     }
@@ -436,7 +436,7 @@
       ];
       await commitChanges(changes, "更新站点设置");
       await loadAll();
-      setStatus($("settingsStatus"), "设置已保存并提交 ✔", true);
+      setStatus($("settingsStatus"), "设置已保存并提交 ✔ 站点约 1-3 分钟更新", true);
     } catch (e) {
       setStatus($("settingsStatus"), "保存失败：" + e.message, false);
     }
