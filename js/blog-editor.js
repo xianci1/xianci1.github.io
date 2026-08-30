@@ -58,7 +58,8 @@
     opts = opts || {};
     var headers = { Accept: "application/vnd.github+json" };
     if (cfg && cfg.token) headers.Authorization = "token " + cfg.token;
-    var init = { method: opts.method || "GET", headers: headers };
+    var method = opts.method || "GET";
+    var init = { method: method, headers: headers };
     if (opts.body !== undefined) {
       headers["Content-Type"] = "application/json";
       init.body = JSON.stringify(opts.body);
@@ -70,7 +71,11 @@
         var j = await res.json();
         if (j && j.message) msg = j.message;
       } catch (e) { /* ignore */ }
-      throw new Error(msg);
+      var hint = "";
+      if (res.status === 403 || res.status === 404) {
+        hint = "（写操作失败时，请确认 Token 的 Contents 权限是 Read and write，不只是 Read）";
+      }
+      throw new Error(method + " " + path + " 失败：" + msg + hint);
     }
     return res.status === 204 ? null : res.json();
   }
@@ -120,16 +125,29 @@
     }
   }
 
+  /* Contents API 的 PUT/DELETE；非 ASCII 文件名偶尔需要未编码路径重试 */
+  async function requestContents(method, filePath, body) {
+    try {
+      return await gh(repoPath() + "/contents/" + encodePath(filePath), {
+        method: method,
+        body: body
+      });
+    } catch (e) {
+      if (method !== "PUT" && method !== "DELETE") throw e;
+      return await gh(repoPath() + "/contents/" + filePath, {
+        method: method,
+        body: body
+      });
+    }
+  }
+
   async function commitChanges(changes, message) {
     for (var i = 0; i < changes.length; i++) {
       var ch = changes[i];
       var sha = await getFileSha(ch.path);
       if (ch.delete) {
         if (!sha) continue; /* 文件不存在，无需删除 */
-        await gh(repoPath() + "/contents/" + encodePath(ch.path), {
-          method: "DELETE",
-          body: { message: message, sha: sha, branch: cfg.branch }
-        });
+        await requestContents("DELETE", ch.path, { message: message, sha: sha, branch: cfg.branch });
         continue;
       }
       var body = {
@@ -138,10 +156,7 @@
         branch: cfg.branch
       };
       if (sha) body.sha = sha;
-      await gh(repoPath() + "/contents/" + encodePath(ch.path), {
-        method: "PUT",
-        body: body
-      });
+      await requestContents("PUT", ch.path, body);
     }
   }
 
