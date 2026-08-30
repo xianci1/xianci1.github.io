@@ -9,14 +9,5 @@ window.BLOG_DATA = {
     since: 2026
   },
   posts: [
-    {
-      slug: "deploy-github-pages",
-      title: "部署到 GitHub Pages 全流程",
-      date: "2026-08-28",
-      category: "教程",
-      tags: ["GitHub Pages", "部署", "静态网站"],
-      excerpt: "从零开始，把这个纯静态博客免费部署到 GitHub Pages，并绑定自己的域名。",
-      url: "posts/deploy-github-pages.html"
-    }
   ]
 };
