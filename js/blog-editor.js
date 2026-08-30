@@ -75,7 +75,9 @@
       if (res.status === 403 || res.status === 404) {
         hint = "（连接/读取失败通常是 Token 已过期、被撤销，或没有勾选这个仓库；写操作失败请确认 Contents 权限是 Read and write）";
       }
-      throw new Error(method + " " + path + " 失败：" + msg + hint);
+      var err = new Error(method + " " + path + " 失败：" + msg + hint);
+      err.status = res.status;
+      throw err;
     }
     return res.status === 204 ? null : res.json();
   }
@@ -90,7 +92,7 @@
     try {
       items = await gh(repoPath() + "/contents/_posts");
     } catch (e) {
-      if (String(e.message).indexOf("404") >= 0) return;
+      if (e.status === 404) return; /* _posts 目录不存在（所有文章已删除） */
       throw e;
     }
     allPosts = [];
@@ -120,7 +122,7 @@
       var f = await gh(repoPath() + "/contents/" + encodePath(filePath));
       return f.sha;
     } catch (e) {
-      if (String(e.message).indexOf("404") >= 0) return null;
+      if (e.status === 404) return null;
       throw e;
     }
   }
