@@ -19,6 +19,15 @@ window.BLOG_DATA = {
       url: "posts/保研无望.html"
     },
     {
+      slug: "发牢骚",
+      title: "发牢骚",
+      date: "2026-08-31",
+      category: "随笔",
+      tags: [],
+      excerpt: "明明老子都大概率不能保研了，可还是要顾于优本计划去给老师干活，当免费劳动力了，还要极限考研，我真的是服了/",
+      url: "posts/发牢骚.html"
+    },
+    {
       slug: "new-post",
       title: "新征程",
       date: "2026-08-30",
