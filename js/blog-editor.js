@@ -443,9 +443,13 @@
   }
 
   /* ---------- 编辑器 ---------- */
-  function defaultMd(title) {
+  function slugFromTitle(title) {
+    return String(title || "").trim().replace(/\s+/g, "-").replace(/[\\/:*?"<>|#%]/g, "") || "new-post";
+  }
+
+  function defaultMd(title, slug) {
     var date = new Date().toISOString().slice(0, 10);
-    return '---\ntitle: "' + title + '"\ndate: ' + date +
+    return '---\ntitle: "' + title + '"\nslug: ' + slug + '\ndate: ' + date +
       '\ncategory: 未分类\ntags: []\nexcerpt: ""\n---\n\n# ' + title +
       "\n\n在这里开始写正文……\n";
   }
@@ -467,7 +471,7 @@
     var title = window.prompt("文章标题", "新文章");
     if (title === null) return;
     title = title.trim() || "新文章";
-    var md = defaultMd(title);
+    var md = defaultMd(title, slugFromTitle(title));
     editing = { md: md, file: null, originalSlug: null };
     $("mdInput").value = md;
     $("editorTitle").textContent = "新建文章";
@@ -568,7 +572,10 @@
 
   async function savePost() {
     var md = $("mdInput").value;
-    var fallback = editing && editing.originalSlug ? editing.originalSlug : "new-post";
+    var preview = window.BlogMD.parsePost(md, "preview");
+    var fallback = editing && editing.originalSlug
+      ? editing.originalSlug
+      : slugFromTitle(preview.title);
     var post = window.BlogMD.parsePost(md, fallback);
     if (!post.slug) {
       setStatus($("editorStatus"), "slug 不能为空", false);
@@ -578,7 +585,7 @@
       return p.slug === post.slug && (!editing || p.slug !== editing.originalSlug);
     });
     if (dup) {
-      setStatus($("editorStatus"), "已存在 slug 相同的文章：" + post.slug, false);
+      setStatus($("editorStatus"), "已存在 slug 相同的文章：" + post.slug + "（可修改 frontmatter 里的 slug 后重试）", false);
       return;
     }
 
