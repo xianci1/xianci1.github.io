@@ -19,6 +19,15 @@ window.BLOG_DATA = {
       url: "posts/科研项目.html"
     },
     {
+      slug: "恼骚一",
+      title: "恼骚一",
+      date: "2026-09-01",
+      category: "随笔",
+      tags: [],
+      excerpt: "今天在教研室待了差不多一天，考研还没开始，唉，能不能快点出结果啊，虽然已经尘埃落定了",
+      url: "posts/恼骚一.html"
+    },
+    {
       slug: "保研无望",
       title: "保研无望",
       date: "2026-08-31",
