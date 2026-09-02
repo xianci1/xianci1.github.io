@@ -10,6 +10,15 @@ window.BLOG_DATA = {
   },
   posts: [
     {
+      slug: "好烦啊",
+      title: "好烦啊",
+      date: "2026-09-02",
+      category: "随笔",
+      tags: [],
+      excerpt: "2号了，我的考研还没开始，现在还要改文档，中午又要见老师，下午去上课，我真的是服了，保不上也考不上的话我要怎么办啊",
+      url: "posts/好烦啊.html"
+    },
+    {
       slug: "科研项目",
       title: "科研项目",
       date: "2026-09-01",
