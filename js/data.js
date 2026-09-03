@@ -10,6 +10,15 @@ window.BLOG_DATA = {
   },
   posts: [
     {
+      slug: "记录好风景",
+      title: "记录好风景",
+      date: "2026-09-03",
+      category: "随笔",
+      tags: [],
+      excerpt: "明天出专项名额，我有机会工程硕博吗？希望吧，先相信？",
+      url: "posts/记录好风景.html"
+    },
+    {
       slug: "好烦啊",
       title: "好烦啊",
       date: "2026-09-02",
