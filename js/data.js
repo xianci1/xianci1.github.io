@@ -19,6 +19,15 @@ window.BLOG_DATA = {
       url: "posts/记录好风景.html"
     },
     {
+      slug: "新文章",
+      title: "新文章",
+      date: "2026-09-03",
+      category: "未分类",
+      tags: [],
+      excerpt: "在这里开始写正文……",
+      url: "posts/新文章.html"
+    },
+    {
       slug: "好烦啊",
       title: "好烦啊",
       date: "2026-09-02",
