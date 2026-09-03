@@ -98,7 +98,7 @@ excerpt: "一句话摘要，留空会自动从正文取。"
 3. **Repository permissions → Contents** 选 **Read and write**
 4. 生成并复制 token，粘贴到写作台的连接面板
 
-连接后就可以在浏览器里**新建 / 编辑 / 删除**文章，还能直接修改**关于页**和**友链页**，右侧实时预览；也可以**上传图片和文档**（自动存入 `assets/uploads/`，一键插入到文章里，图片显示、文档变下载链接）；点“保存到 GitHub”会把 Markdown、生成的 HTML 和 `js/data.js` 一次性提交到仓库，GitHub Pages 会自动重新发布。
+连接后就可以在浏览器里**新建 / 编辑 / 删除**文章，还能直接修改**关于页**和**友链页**，右侧实时预览；**图片用编辑器里的“插入图片”，会自动压缩并直接存进文章**（不产生独立文件，不会丢），**文档**上传到 `assets/uploads/` 变成下载链接；点“保存到 GitHub”会把 Markdown、生成的 HTML 和 `js/data.js` 一次性提交到仓库，GitHub Pages 会自动重新发布。
 
 说明：
 - Token 只保存在当前浏览器的 `localStorage`，只发送给 `api.github.com`，不会上传到博客服务器

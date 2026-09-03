@@ -279,6 +279,99 @@
     });
   }
 
+  function readFileAsDataUri(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(String(reader.result || "")); };
+      reader.onerror = function () { reject(new Error("读取图片失败")); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function loadImageFromFile(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        resolve(img);
+      };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error("无法解析图片：" + file.name));
+      };
+      img.src = url;
+    });
+  }
+
+  function canvasToDataUri(img, maxDim) {
+    var scale = Math.min(1, maxDim / Math.max(img.width, 1), maxDim / Math.max(img.height, 1));
+    var w = Math.max(1, Math.round(img.width * scale));
+    var h = Math.max(1, Math.round(img.height * scale));
+    var canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    var mime = "image/jpeg";
+    try {
+      var test = canvas.toDataURL("image/webp", 0.85);
+      if (test.indexOf("data:image/webp") === 0) mime = "image/webp";
+    } catch (e) { /* 不支持就退回 jpeg */ }
+    return canvas.toDataURL(mime, 0.85);
+  }
+
+  function dataUriBytes(uri) {
+    var i = uri.indexOf(",");
+    if (i < 0) return 0;
+    return Math.floor((uri.length - i - 1) * 3 / 4);
+  }
+
+  /* 图片 → data URI：小图原样嵌入，大图压缩到最长边 1600px */
+  async function prepareImageDataUri(file) {
+    var raw = await readFileAsDataUri(file);
+    var uri = raw;
+    if (file.size > 600 * 1024) {
+      try {
+        var img = await loadImageFromFile(file);
+        var processed = canvasToDataUri(img, 1600);
+        if (dataUriBytes(processed) < dataUriBytes(raw)) uri = processed;
+      } catch (e) {
+        uri = raw; /* 解析失败就按原样嵌入 */
+      }
+    }
+    if (dataUriBytes(uri) > 2 * 1024 * 1024) {
+      throw new Error(file.name + " 处理后仍超过 2MB，请压缩图片后重试");
+    }
+    return uri;
+  }
+
+  async function insertImages(files) {
+    if (!editing) {
+      window.alert("请先新建或打开一篇文章/页面，再插入图片");
+      return;
+    }
+    if (!files || !files.length) return;
+    setStatus($("editorStatus"), "正在压缩并插入图片…");
+    try {
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        if (!/^image\//.test(file.type)) {
+          setStatus($("editorStatus"), "只支持图片文件：" + file.name, false);
+          continue;
+        }
+        var uri = await prepareImageDataUri(file);
+        var alt = String(file.name || "图片").replace(/[[\]]/g, "").replace(/\.[^.]+$/, "");
+        insertAtCursor("\n![" + alt + "](" + uri + ")\n");
+      }
+      setStatus($("editorStatus"), "已插入图片（图片已直接存进文章，保存即可发布）✔", true);
+    } catch (e) {
+      setStatus($("editorStatus"), "插入图片失败：" + e.message, false);
+    }
+  }
+
   function snippetFor(name) {
     var lower = String(name || "").toLowerCase();
     var isImage = /\.(png|jpe?g|gif|webp|svg|bmp|ico)$/.test(lower);
@@ -719,6 +812,17 @@
     $("uploadBtn").onclick = function () {
       uploadFiles($("fileInput").files);
       $("fileInput").value = "";
+    };
+    $("insertImageBtn").onclick = function () {
+      if (!editing) {
+        window.alert("请先新建或打开一篇文章/页面，再插入图片");
+        return;
+      }
+      $("imageInput").click();
+    };
+    $("imageInput").onchange = function () {
+      insertImages($("imageInput").files);
+      $("imageInput").value = "";
     };
     $("mdInput").addEventListener("input", updatePreview);
 

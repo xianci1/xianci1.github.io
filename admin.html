@@ -81,7 +81,8 @@
       </div>
       <p class="token-note" style="margin-top: 0;">
         支持图片（png / jpg / gif / webp / svg）和文档（pdf / doc / zip 等）。
-        上传后点“插入”即可在文章里引用；图片显示，文档变成下载链接。
+        上传后点“插入”即可在文章里引用；文档变成下载链接。
+        <strong>图片建议直接用编辑器里的“插入图片”，会压缩后直接存进文章，不需要单独管理文件。</strong>
         单个文件建议不超过 10MB。
       </p>
       <div class="status" id="filesStatus"></div>
@@ -92,6 +93,10 @@
       <h2 id="editorTitle">编辑文章</h2>
       <div class="editor-grid">
         <div>
+          <div class="actions" style="margin-top: 0; margin-bottom: 6px;">
+            <button class="btn" id="insertImageBtn">＋ 插入图片（直接存进文章）</button>
+          </div>
+          <input type="file" id="imageInput" accept="image/*" multiple hidden>
           <div class="field">
             <textarea id="mdInput" placeholder="---&#10;title: &quot;文章标题&quot;&#10;date: 2026-08-30&#10;category: 教程&#10;tags: [标签1, 标签2]&#10;excerpt: &quot;&quot;&#10;---&#10;&#10;# 标题&#10;&#10;正文……"></textarea>
           </div>
