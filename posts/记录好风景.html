@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>记录好风景 - 博客</title>
+  <meta name="description" content="明天出专项名额，我有机会工程硕博吗？希望吧，先相信？">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page="post">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="site-title" href="../index.html">博客</a>
+      <nav class="site-nav" id="siteNav">
+        <a href="../index.html" data-nav="home">首页</a>
+        <a href="../posts.html" data-nav="posts">文章</a>
+        <a href="../categories.html" data-nav="categories">分类</a>
+        <a href="../tags.html" data-nav="tags">标签</a>
+        <a href="../about.html" data-nav="about">关于</a>
+        <a href="../friends.html" data-nav="friends">友链</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn" id="searchBtn" title="搜索 (Ctrl+K)" aria-label="搜索">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="M21 21l-4.3-4.3"></path>
+          </svg>
+        </button>
+        <button class="icon-btn menu-btn" id="menuBtn" aria-label="菜单">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container article">
+    <article data-slug="记录好风景">
+      <header class="article-head">
+        <h1>记录好风景</h1>
+        <div class="post-meta article-meta"></div>
+      </header>
+
+      <div class="article-body">
+<h1>记录好风景</h1><p>  明天出专项名额，我有机会工程硕博吗？希望吧，先相信？ <img src="../assets/uploads/风景1.jpg" alt="风景1.jpg"></p>
+      </div>
+    </article>
+    <nav class="post-nav" id="postNav"></nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© <span id="footerYear"></span> <span id="footerName">xianci</span> · 纯静态博客 · <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a></p>
+    </div>
+  </footer>
+
+  <div class="search-overlay" id="searchOverlay" hidden>
+    <div class="search-box">
+      <div class="search-head">
+        <input id="searchInput" type="text" placeholder="输入关键词搜索文章…" autocomplete="off">
+        <button class="icon-btn" id="searchCloseBtn" aria-label="关闭">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6L6 18"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="search-tags" id="searchHotTags"></div>
+      <ul class="search-results" id="searchResults"></ul>
+    </div>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>
