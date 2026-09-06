@@ -10,6 +10,15 @@ window.BLOG_DATA = {
   },
   posts: [
     {
+      slug: "名额",
+      title: "名额",
+      date: "2026-09-06",
+      category: "随笔",
+      tags: [],
+      excerpt: "明天就公布gcsb的名额了，很想有书读了，真的球球了，球球gcsb涨到33%左右吧，我真的很想保研啊",
+      url: "posts/名额.html"
+    },
+    {
       slug: "名额看涨",
       title: "名额看涨",
       date: "2026-09-05",
