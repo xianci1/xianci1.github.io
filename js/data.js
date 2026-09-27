@@ -10,6 +10,15 @@ window.BLOG_DATA = {
   },
   posts: [
     {
+      slug: "中秋国庆",
+      title: "中秋国庆",
+      date: "2026-09-27",
+      category: "随笔",
+      tags: [],
+      excerpt: "学校不放，我自己放不就是了",
+      url: "posts/中秋国庆.html"
+    },
+    {
       slug: "我的世界殖民地开坑",
       title: "我的世界殖民地开坑",
       date: "2026-09-14",
