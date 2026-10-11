@@ -1,5 +1,5 @@
-/* 本文件由 build.ps1 自动生成，请勿手动修改。
- * 修改 _config.json 和 _posts/*.md 后运行 .\build.ps1 即可。 */
+/* 本文件由 build.ps1 / 写作台 自动生成，请勿手动修改。
+ * 修改 _config.json 和 _posts/*.md 后重新构建即可。 */
 window.BLOG_DATA = {
   site: {
     title: "博客",
@@ -9,6 +9,15 @@ window.BLOG_DATA = {
     since: 2026
   },
   posts: [
+    {
+      slug: "2026上海冠军赛",
+      title: "2026上海冠军赛",
+      date: "2026-10-11",
+      category: "瓦",
+      tags: [],
+      excerpt: "这NRG真tm菜啊",
+      url: "posts/2026上海冠军赛.html"
+    },
     {
       slug: "中秋国庆",
       title: "中秋国庆",
