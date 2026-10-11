@@ -42,6 +42,7 @@ blog/
 ├── tags.html            # 标签云
 ├── about.html           # 关于页（由 _pages/about.md 生成）
 ├── friends.html         # 友链页（由 _pages/friends.md 生成）
+├── calendar.html        # 日历计划（写每天的计划，浏览器本地保存）
 ├── 404.html             # 404 页面
 ├── admin.html           # ★ 写作台（浏览器里写文章）
 ├── posts/               # ★ 生成的文章 HTML，不要手改
@@ -50,6 +51,7 @@ blog/
 ├── js/main.js           # 列表渲染 + 搜索 + 菜单
 ├── js/md.js             # Markdown 转换（写作台和构建共用）
 ├── js/blog-editor.js    # 写作台逻辑（GitHub API）
+├── js/calendar.js       # 日历计划逻辑（月视图 + 自动保存）
 ├── assets/uploads/      # ★ 写作台上传的图片 / 文档
 └── assets/favicon.svg   # 站点图标
 ```
@@ -88,6 +90,19 @@ excerpt: "一句话摘要，留空会自动从正文取。"
 - 或者启动本地服务器：
   - `python -m http.server 8000`，然后访问 <http://localhost:8000>
   - 或安装 Node.js 后用 `npx serve`
+
+## 日历计划（每天的计划）
+
+打开 `calendar.html`（导航栏里的“日历”）即可使用：点击任意日期，在右侧写下当天的计划。
+
+- 有计划的日期会显示一个圆点和一句摘要，今天会用主题色标出
+- 用 ‹ › 切换上 / 下个月，点“今天”回到当月；点“清空当天”删除当天计划
+- 连接 GitHub 后，点“保存到 GitHub”会把计划提交到仓库的 `data/calendar.json`，和文章一样自动发布
+- “导出备份”会下载一份 `calendar-plans-日期.json`，“导入备份”可合并回来（也用于迁移数据）
+
+说明：
+- 计划会即时保存在浏览器本地；只有点“保存到 GitHub”后才会写入仓库（和写作台共用同一个 Token，存在 `localStorage`，只发送给 `api.github.com`）
+- **隐私提醒**：如果博客仓库是公开的，`data/calendar.json` 及其提交历史也会被公开访问，别人可以搜到你的计划内容。不想公开就保持未连接状态（计划只留在本浏览器），或把仓库设为私有
 
 ## 在网页上写文章（写作台）
 

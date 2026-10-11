@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>日历 - 博客</title>
+  <meta name="description" content="日历计划：在每一天写下当天的安排。">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="calendar">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="site-title" href="index.html">博客</a>
+      <nav class="site-nav" id="siteNav">
+        <a href="index.html" data-nav="home">首页</a>
+        <a href="posts.html" data-nav="posts">文章</a>
+        <a href="categories.html" data-nav="categories">分类</a>
+        <a href="tags.html" data-nav="tags">标签</a>
+        <a href="about.html" data-nav="about">关于</a>
+        <a href="friends.html" data-nav="friends">友链</a>
+        <a href="calendar.html" data-nav="calendar">日历</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn" id="searchBtn" title="搜索 (Ctrl+K)" aria-label="搜索">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="M21 21l-4.3-4.3"></path>
+          </svg>
+        </button>
+        <button class="icon-btn menu-btn" id="menuBtn" aria-label="菜单">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container page">
+    <h1>日历计划</h1>
+    <p class="page-desc">点击任意日期，写下当天的计划。连接 GitHub 后，计划会保存到仓库并同步到网上。</p>
+
+    <div class="calendar-connect card" id="calConnect" hidden>
+      <div class="calendar-connect-head">
+        <h2>连接 GitHub</h2>
+        <span class="calendar-gh-state" id="calGhState"></span>
+      </div>
+      <p class="calendar-hint">连接后计划会保存到仓库的 data/calendar.json，与写作台共用同一个 Token（只保存在本浏览器，只发送给 api.github.com）。</p>
+      <div class="calendar-connect-fields">
+        <input id="calOwner" type="text" placeholder="仓库所有者（GitHub 用户名）">
+        <input id="calRepo" type="text" placeholder="仓库名（如 xianci1.github.io）">
+        <input id="calBranch" type="text" placeholder="分支（默认 main）" value="main">
+        <input id="calToken" type="password" placeholder="Personal Access Token">
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="calConnectBtn">连接</button>
+        <a class="btn" href="admin.html">去写作台设置</a>
+      </div>
+    </div>
+
+    <div class="calendar-layout">
+      <section class="calendar-panel card">
+        <div class="calendar-toolbar">
+          <button class="btn" id="calPrev" title="上个月" aria-label="上个月">‹</button>
+          <button class="btn" id="calToday">今天</button>
+          <div class="calendar-title" id="calTitle"></div>
+          <button class="btn" id="calNext" title="下个月" aria-label="下个月">›</button>
+        </div>
+        <div class="calendar-weekdays">
+          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+        </div>
+        <div class="calendar-days" id="calDays"></div>
+      </section>
+
+      <aside class="calendar-editor card">
+        <div class="calendar-editor-head">
+          <h2 id="calDateLabel">选择一天</h2>
+          <span class="calendar-save-state" id="calSaveState"></span>
+        </div>
+        <textarea id="calPlan" rows="9" placeholder="点击日期后，在这里写当天的计划……" disabled></textarea>
+        <div class="calendar-editor-actions">
+          <button class="btn danger" id="calClear" disabled>清空当天</button>
+          <button class="btn primary" id="calSyncBtn" disabled>保存到 GitHub</button>
+          <button class="btn" id="calExport">导出备份</button>
+          <button class="btn" id="calImport">导入备份</button>
+          <input type="file" id="calImportFile" accept=".json,application/json" hidden>
+        </div>
+        <p class="calendar-hint" id="calHint">未连接 GitHub 时，计划只存在本浏览器；连接后点“保存到 GitHub”即提交到仓库。注意：若仓库是公开的，计划内容也会被公开访问和搜索。</p>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© <span id="footerYear"></span> <span id="footerName">博客</span> · 纯静态博客 · <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a></p>
+    </div>
+  </footer>
+
+  <div class="search-overlay" id="searchOverlay" hidden>
+    <div class="search-box">
+      <div class="search-head">
+        <input id="searchInput" type="text" placeholder="输入关键词搜索文章…" autocomplete="off">
+        <button class="icon-btn" id="searchCloseBtn" aria-label="关闭">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6L6 18"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="search-tags" id="searchHotTags"></div>
+      <ul class="search-results" id="searchResults"></ul>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/calendar.js"></script>
+</body>
+</html>
