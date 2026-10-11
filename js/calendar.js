@@ -1,5 +1,5 @@
 /* ============================================================
- * 日历计划：月视图 + 每天的计划
+ * 日历计划：按周视图 + 每天的计划
  * - 本地：localStorage 即时保存（blog-calendar-plans）
  * - 云端：连接 GitHub 后读写 data/calendar.json（与写作台共用 Token）
  * ============================================================ */
@@ -9,6 +9,7 @@
   var LS_PLANS = "blog-calendar-plans";
   var LS_CFG = "blog_gh_settings";
   var DATA_PATH = "data/calendar.json";
+  var WEEKDAYS = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
 
   var plans = {};
   var cfg = null;
@@ -16,14 +17,19 @@
   var dirty = false;
   var syncing = false;
   var storageOk = true;
-  var state = { year: 0, month: 0, selected: null };
+  var state = { weekStart: null, selected: null };
 
   function $(id) { return document.getElementById(id); }
 
-  var daysEl = $("calDays");
-  var titleEl = $("calTitle");
+  var weekEl = $("calWeek");
+  var rangeEl = $("calRange");
+  var weekNumEl = $("calWeekNum");
+  var statsEl = $("calStats");
+  var jumpEl = $("calJump");
   var dateLabelEl = $("calDateLabel");
+  var dateChipEl = $("calDateChip");
   var planEl = $("calPlan");
+  var countEl = $("calCount");
   var saveStateEl = $("calSaveState");
   var clearBtn = $("calClear");
   var syncBtn = $("calSyncBtn");
@@ -40,6 +46,26 @@
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+
+  function mondayOf(d) {
+    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+    return x;
+  }
+
+  function addDays(d, n) {
+    var x = new Date(d.getTime());
+    x.setDate(x.getDate() + n);
+    return x;
+  }
+
+  function isoWeek(d) {
+    var date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    var dayNum = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+    var yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+    return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
   }
 
   function setSaveState(text, cls) {
@@ -258,76 +284,107 @@
     return Number(p[1]) + "月" + Number(p[2]) + "日 · " + weekdayLabel(dateStr);
   }
 
-  function render() {
-    titleEl.textContent = state.year + "年" + (state.month + 1) + "月";
+  function rangeLabel(start, end) {
+    var a = (start.getMonth() + 1) + "月" + start.getDate() + "日";
+    var b = (end.getMonth() + 1) + "月" + end.getDate() + "日";
+    return a + " – " + b;
+  }
 
-    var first = new Date(state.year, state.month, 1);
-    var daysInMonth = new Date(state.year, state.month + 1, 0).getDate();
-    var offset = (first.getDay() + 6) % 7; /* 周一为第一列 */
+  function render() {
+    var start = mondayOf(state.weekStart);
+    state.weekStart = start;
+    var end = addDays(start, 6);
+    rangeEl.textContent = rangeLabel(start, end);
+    weekNumEl.textContent = "第 " + isoWeek(start) + " 周";
     var today = fmt(new Date());
 
     var html = "";
-    for (var i = 0; i < offset; i++) {
-      html += '<div class="cal-day blank"></div>';
-    }
-    for (var d = 1; d <= daysInMonth; d++) {
-      var key = state.year + "-" + pad(state.month + 1) + "-" + pad(d);
+    for (var i = 0; i < 7; i++) {
+      var d = addDays(start, i);
+      var key = fmt(d);
       var raw = plans[key] == null ? "" : String(plans[key]);
       var plan = raw.trim();
       var cls = "cal-day";
+      if (i >= 5) cls += " weekend";
       if (key === today) cls += " today";
       if (key === state.selected) cls += " selected";
       if (plan) cls += " has-plan";
-
-      var preview = "";
-      if (plan) {
-        preview = plan.split("\n")[0];
-        if (preview.length > 8) preview = preview.slice(0, 8) + "…";
-      }
+      else cls += " empty";
 
       html += '<button type="button" class="' + cls + '" data-date="' + key + '">' +
-        '<span class="num">' + d + "</span>" +
-        (plan ? '<span class="dot"></span><span class="preview">' + esc(preview) + "</span>" : "") +
+        '<span class="cal-day-top">' +
+        '<span class="cal-day-week">' + WEEKDAYS[i] + "</span>" +
+        '<span class="cal-day-date">' + (d.getMonth() + 1) + "/" + d.getDate() + "</span>" +
+        "</span>" +
+        '<span class="cal-day-plan">' + (plan ? esc(plan) : "＋ 添加计划") + "</span>" +
         "</button>";
     }
-    daysEl.innerHTML = html;
+    weekEl.innerHTML = html;
+    updateStats();
+  }
+
+  function updateStats() {
+    var keys = [];
+    for (var i = 0; i < 7; i++) keys.push(fmt(addDays(state.weekStart, i)));
+    var weekCount = 0;
+    var total = 0;
+    for (var k in plans) {
+      if (!Object.prototype.hasOwnProperty.call(plans, k)) continue;
+      if (String(plans[k] || "").trim() === "") continue;
+      total++;
+      if (keys.indexOf(k) >= 0) weekCount++;
+    }
+    statsEl.textContent = "本周 " + weekCount + " 天有计划 · 累计 " + total + " 天";
+  }
+
+  function updateCount() {
+    countEl.textContent = planEl.value.replace(/\s/g, "").length + " 字";
   }
 
   function openEditor(dateStr, shouldFocus) {
     state.selected = dateStr;
     dateLabelEl.textContent = formatLabel(dateStr);
+    var isToday = dateStr === fmt(new Date());
+    dateChipEl.textContent = isToday ? "今天" : "已选日期";
+    dateChipEl.className = "calendar-date-chip" + (isToday ? " today" : "");
     planEl.disabled = false;
     clearBtn.disabled = false;
     planEl.value = plans[dateStr] == null ? "" : String(plans[dateStr]);
+    updateCount();
     updateStatus();
     render();
     if (shouldFocus) planEl.focus();
   }
 
-  function changeMonth(delta) {
-    var d = new Date(state.year, state.month + delta, 1);
-    state.year = d.getFullYear();
-    state.month = d.getMonth();
+  function changeWeek(delta) {
+    state.weekStart = addDays(state.weekStart, delta * 7);
     render();
   }
 
-  function goToday() {
+  function goThisWeek() {
     var now = new Date();
-    state.year = now.getFullYear();
-    state.month = now.getMonth();
+    state.weekStart = mondayOf(now);
     openEditor(fmt(now), false);
   }
 
   /* ---------- 事件 ---------- */
-  document.getElementById("calPrev").addEventListener("click", function () { changeMonth(-1); });
-  document.getElementById("calNext").addEventListener("click", function () { changeMonth(1); });
-  document.getElementById("calToday").addEventListener("click", goToday);
+  document.getElementById("calPrev").addEventListener("click", function () { changeWeek(-1); });
+  document.getElementById("calNext").addEventListener("click", function () { changeWeek(1); });
+  document.getElementById("calToday").addEventListener("click", goThisWeek);
   document.getElementById("calConnectBtn").addEventListener("click", connectFromForm);
 
-  daysEl.addEventListener("click", function (e) {
+  jumpEl.addEventListener("change", function () {
+    var v = jumpEl.value;
+    if (!v) return;
+    var d = new Date(v + "T00:00:00");
+    state.weekStart = mondayOf(d);
+    openEditor(v, true);
+  });
+
+  weekEl.addEventListener("click", function (e) {
     var node = e.target;
-    while (node && node !== daysEl) {
-      if (node.classList && node.classList.contains("cal-day") && !node.classList.contains("blank")) {
+    while (node && node !== weekEl) {
+      if (node.classList && node.classList.contains("cal-day")) {
         openEditor(node.getAttribute("data-date"), true);
         return;
       }
@@ -342,6 +399,7 @@
     else plans[state.selected] = val;
     persistLocal();
     dirty = true;
+    updateCount();
     updateStatus();
     render();
   });
@@ -352,6 +410,7 @@
     planEl.value = "";
     persistLocal();
     dirty = true;
+    updateCount();
     updateStatus();
     render();
   });
@@ -427,9 +486,9 @@
   loadCfg();
 
   var now = new Date();
-  state.year = now.getFullYear();
-  state.month = now.getMonth();
+  state.weekStart = mondayOf(now);
   state.selected = fmt(now);
+  jumpEl.value = state.selected;
 
   if (cfg) {
     $("calOwner").value = cfg.owner || "";

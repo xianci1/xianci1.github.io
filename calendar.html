@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>日历 - 博客</title>
-  <meta name="description" content="日历计划：在每一天写下当天的安排。">
+  <meta name="description" content="日历计划：按周安排，在每一天写下当天的计划。">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -39,7 +39,7 @@
 
   <main class="container page">
     <h1>日历计划</h1>
-    <p class="page-desc">点击任意日期，写下当天的计划。连接 GitHub 后，计划会保存到仓库并同步到网上。</p>
+    <p class="page-desc">按周安排：点击任意一天，在右侧写下当天的计划，内容会自动保存。</p>
 
     <div class="calendar-connect card" id="calConnect" hidden>
       <div class="calendar-connect-head">
@@ -62,31 +62,54 @@
     <div class="calendar-layout">
       <section class="calendar-panel card">
         <div class="calendar-toolbar">
-          <button class="btn" id="calPrev" title="上个月" aria-label="上个月">‹</button>
-          <button class="btn" id="calToday">今天</button>
-          <div class="calendar-title" id="calTitle"></div>
-          <button class="btn" id="calNext" title="下个月" aria-label="下个月">›</button>
+          <button class="cal-nav" id="calPrev" aria-label="上一周">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+          </button>
+          <button class="cal-today" id="calToday">本周</button>
+          <div class="calendar-title">
+            <span class="calendar-range" id="calRange"></span>
+            <span class="calendar-weeknum" id="calWeekNum"></span>
+          </div>
+          <button class="cal-nav" id="calNext" aria-label="下一周">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
+          </button>
         </div>
-        <div class="calendar-weekdays">
-          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+
+        <div class="calendar-week" id="calWeek"></div>
+
+        <div class="calendar-foot">
+          <label class="calendar-jump">
+            跳到日期
+            <input type="date" id="calJump">
+          </label>
+          <span class="calendar-stats" id="calStats"></span>
         </div>
-        <div class="calendar-days" id="calDays"></div>
       </section>
 
       <aside class="calendar-editor card">
-        <div class="calendar-editor-head">
-          <h2 id="calDateLabel">选择一天</h2>
-          <span class="calendar-save-state" id="calSaveState"></span>
+        <div class="calendar-editor-bar"></div>
+        <div class="calendar-editor-inner">
+          <div class="calendar-editor-head">
+            <div class="calendar-editor-title">
+              <span class="calendar-date-chip" id="calDateChip">今天</span>
+              <h2 id="calDateLabel">选择一天</h2>
+            </div>
+            <span class="calendar-save-state" id="calSaveState"></span>
+          </div>
+          <textarea id="calPlan" rows="9" placeholder="写下当天的计划……" disabled></textarea>
+          <div class="calendar-editor-meta"><span id="calCount">0 字</span></div>
+          <div class="calendar-editor-actions">
+            <button class="btn primary" id="calSyncBtn" disabled>保存到 GitHub</button>
+            <button class="btn" id="calClear" disabled>清空</button>
+          </div>
+          <div class="calendar-editor-tools">
+            <button class="cal-link" id="calExport">导出备份</button>
+            <span>·</span>
+            <button class="cal-link" id="calImport">导入备份</button>
+            <input type="file" id="calImportFile" accept=".json,application/json" hidden>
+          </div>
+          <p class="calendar-hint" id="calHint">未连接 GitHub 时，计划只存在本浏览器；连接后点“保存到 GitHub”即提交到仓库。注意：若仓库是公开的，计划内容也会被公开访问和搜索。</p>
         </div>
-        <textarea id="calPlan" rows="9" placeholder="点击日期后，在这里写当天的计划……" disabled></textarea>
-        <div class="calendar-editor-actions">
-          <button class="btn danger" id="calClear" disabled>清空当天</button>
-          <button class="btn primary" id="calSyncBtn" disabled>保存到 GitHub</button>
-          <button class="btn" id="calExport">导出备份</button>
-          <button class="btn" id="calImport">导入备份</button>
-          <input type="file" id="calImportFile" accept=".json,application/json" hidden>
-        </div>
-        <p class="calendar-hint" id="calHint">未连接 GitHub 时，计划只存在本浏览器；连接后点“保存到 GitHub”即提交到仓库。注意：若仓库是公开的，计划内容也会被公开访问和搜索。</p>
       </aside>
     </div>
   </main>
