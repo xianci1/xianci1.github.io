@@ -664,13 +664,12 @@ a:hover { text-decoration: underline; }
 /* ---------- 日历 · 按周视图 ---------- */
 .calendar-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  grid-template-columns: 1fr;
   gap: 18px;
-  align-items: start;
 }
 
 .calendar-panel { padding: 20px 22px 16px; }
-.calendar-editor { position: sticky; top: calc(var(--header-h) + 16px); padding: 0; overflow: hidden; }
+.calendar-editor { padding: 0; overflow: hidden; }
 .calendar-editor-bar { height: 4px; background: linear-gradient(90deg, var(--accent), #8b5cf6); }
 .calendar-editor-inner { padding: 18px 20px 16px; }
 
@@ -721,11 +720,12 @@ a:hover { text-decoration: underline; }
 
 .calendar-week {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 8px;
 }
 .cal-day {
   min-height: 190px;
+  min-width: 0;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: #fff;
@@ -742,6 +742,7 @@ a:hover { text-decoration: underline; }
 .cal-day:hover { border-color: var(--accent); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
 .cal-day-top {
   display: flex;
+  min-width: 0;
   align-items: baseline;
   justify-content: space-between;
   gap: 4px;
@@ -847,9 +848,7 @@ a:hover { text-decoration: underline; }
   padding-top: 12px;
 }
 
-@media (max-width: 760px) {
-  .calendar-layout { grid-template-columns: 1fr; }
-  .calendar-editor { position: static; }
+@media (max-width: 600px) {
   .calendar-panel { padding: 14px 12px; }
   .calendar-week { grid-template-columns: 1fr; gap: 6px; }
   .cal-day { min-height: 0; flex-direction: row; align-items: flex-start; gap: 10px; padding: 10px 12px; }
