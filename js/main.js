@@ -33,6 +33,10 @@
     });
   }
 
+  function categoryAnchor(name) {
+    return "cat-" + String(name || "未分类").replace(/\s+/g, "-");
+  }
+
   /* ---------- 首页 ---------- */
   function renderHero() {
     var nameEl = document.getElementById("authorName");
@@ -72,28 +76,41 @@
     }).join("");
   }
 
-  /* ---------- 全部文章（按年份） ---------- */
+  /* ---------- 全部文章（按分类） ---------- */
   function renderAll() {
     var box = document.getElementById("allPosts");
     if (!box) return;
-    var byYear = {};
+    var byCategory = {};
     sortedPosts().forEach(function (p) {
-      var y = p.date.slice(0, 4);
-      (byYear[y] = byYear[y] || []).push(p);
+      var c = p.category || "未分类";
+      (byCategory[c] = byCategory[c] || []).push(p);
     });
-    var years = Object.keys(byYear).sort().reverse();
-    box.innerHTML = years.map(function (y) {
-      var items = byYear[y].map(function (p) {
+    var names = Object.keys(byCategory).sort(function (a, b) {
+      if (byCategory[b].length !== byCategory[a].length) {
+        return byCategory[b].length - byCategory[a].length;
+      }
+      return a.localeCompare(b, "zh-CN");
+    });
+    box.innerHTML = names.map(function (name) {
+      var items = byCategory[name].map(function (p) {
         return (
           "<li><span class=\"date\">" + esc(p.date) + "</span>" +
           '<a href="' + base() + esc(p.url) + '">' + esc(p.title) + "</a></li>"
         );
       }).join("");
-      return '<div class="year-group"><h2>' + esc(y) + "</h2><ul>" + items + "</ul></div>";
+      return (
+        '<section class="category-group" id="' + esc(categoryAnchor(name)) + '">' +
+        '<h2 class="category-group-title">' + esc(name) +
+        '<span class="category-group-count">' + byCategory[name].length + " 篇</span></h2>" +
+        "<ul>" + items + "</ul>" +
+        "</section>"
+      );
     }).join("");
 
     var count = document.getElementById("postCount");
-    if (count) count.textContent = "共 " + posts.length + " 篇文章";
+    if (count) {
+      count.textContent = "共 " + posts.length + " 篇文章 · " + names.length + " 个分类";
+    }
   }
 
   /* ---------- 分类 ---------- */
@@ -101,10 +118,14 @@
     var box = document.getElementById("categoryList");
     if (!box) return;
     var map = {};
-    posts.forEach(function (p) {
-      (map[p.category] = map[p.category] || []).push(p);
+    sortedPosts().forEach(function (p) {
+      var c = p.category || "未分类";
+      (map[c] = map[c] || []).push(p);
     });
-    var names = Object.keys(map).sort();
+    var names = Object.keys(map).sort(function (a, b) {
+      if (map[b].length !== map[a].length) return map[b].length - map[a].length;
+      return a.localeCompare(b, "zh-CN");
+    });
     box.innerHTML = names.map(function (name) {
       var items = map[name];
       var seen = {};
@@ -114,10 +135,22 @@
       var tagHtml = Object.keys(seen).map(function (t) {
         return '<a class="tag" href="' + base() + 'tags.html">#' + esc(t) + "</a>";
       }).join("");
+      var href = base() + "posts.html#" + encodeURIComponent(categoryAnchor(name));
+      var preview = items.slice(0, 4).map(function (p) {
+        return (
+          '<li><span class="date">' + esc(p.date) + "</span>" +
+          '<a href="' + base() + esc(p.url) + '">' + esc(p.title) + "</a></li>"
+        );
+      }).join("");
+      var more = items.length > 4
+        ? '<a class="read-more" href="' + href + '">查看全部 ' + items.length + " 篇 →</a>"
+        : "";
       return (
         '<div class="category-card card">' +
-        "<h2><a href=\"" + base() + 'posts.html">' + esc(name) + "</a></h2>" +
+        "<h2><a href=\"" + href + '">' + esc(name) + "</a></h2>" +
         "<p>" + items.length + " 篇文章</p>" +
+        '<ul class="category-post-list">' + preview + "</ul>" +
+        more +
         '<div class="tag-list">' + tagHtml + "</div>" +
         "</div>"
       );
